@@ -1307,8 +1307,9 @@ class LocalTrade:
             self.stake_amount = float(current_stake) / (self.leverage or 1.0)
             self.fee_open_cost = self.fee_open * float(self.max_stake_amount)
             self.recalc_open_trade_value()
-            if self.stop_loss_pct is not None and self.open_rate is not None:
-                self.adjust_stop_loss(self.open_rate, self.stop_loss_pct)
+            ## TODO 为什么这里需要调整stoploss？并且传入open_rate，这个会导致stoploss错误
+            # if self.stop_loss_pct is not None and self.open_rate is not None:
+            #     self.adjust_stop_loss(self.open_rate, self.stop_loss_pct)
         elif is_closing and total_stake > 0:
             # Close profit abs / maximum owned
             # Fees are considered as they are part of close_profit_abs

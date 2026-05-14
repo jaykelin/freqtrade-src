@@ -2380,7 +2380,17 @@ class FreqtradeBot(LoggingMixin):
                         trade.fee_open_currency = None
                     # Don't cancel stoploss in recovery modes immediately
                     trade = self.cancel_stoploss_on_exchange(trade)
-                trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
+                ## TODO 这里还有个问题：如果是部分退出？
+                ## 只有entry订单成交，持仓数量会变化，所以第一步先取消了 stoploss on exchange
+                ## 然后使用策略的 stoploss参数初始化stoploss，
+                ## 如 stoploss = -0.1， 以每次买入1股来计算
+                ## 在 价格 = 100买入一股，此时 stoploss_price = 100 * (1-0.1) = 90
+                ## 在 价格 = 90买入一股，此时 open_rate = (100+90)/2 = 95, stoploss_price = 95 * (1-0.1) = 85.5
+                #trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
+                ## 要让这个调整一定生效 allow_refresh=True，并且应该是在没有开启use_custom_stoploss时
+                ## TODO 跟踪止损如何处理？
+                if not self.strategy.use_custom_stoploss:
+                    trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, allow_refresh=True)
             if (
                 order.ft_order_side == trade.entry_side
                 or (trade.amount > 0 and trade.is_open)
